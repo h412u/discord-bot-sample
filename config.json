@@ -1,0 +1,9 @@
+{
+  "prefix": "!",
+  "welcome_message": "ようこそ！",
+  "welcome_enabled": true,
+  "status_type": "online",
+  "status_message": "",
+  "commands": [],
+  "triggers": []
+}

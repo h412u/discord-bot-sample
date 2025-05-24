@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot 設定</title>
+    <style>
+        body {
+            background-color: #36393f;
+            color: #dcddde;
+            font-family: Arial, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 40px;
+        }
+        .main-content {
+            flex: 1;
+            max-width: 1000px;
+        }
+        .variables-sidebar {
+            width: 300px;
+            background-color: #2f3136;
+            padding: 20px;
+            border-radius: 4px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            margin-left: auto;
+        }
+        .variables-sidebar h3 {
+            margin-top: 0;
+            color: #fff;
+            border-bottom: 1px solid #40444b;
+            padding-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .variables-sidebar code {
+            background-color: #40444b;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        .variables-sidebar span {
+            display: block;
+            margin-bottom: 15px;
+            color: #b9bbbe;
+            font-size: 0.9em;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            background-color: #40444b;
+            border: 1px solid #202225;
+            color: #dcddde;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            background-color: #40444b;
+            border: 1px solid #202225;
+            color: #dcddde;
+            border-radius: 4px;
+            font-family: monospace;
+            min-height: 38px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #5865f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #4752c4;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #43b581;
+            color: white;
+        }
+        .error {
+            background-color: #ed4245;
+            color: white;
+        }
+        .command-group,
+        .trigger-group {
+            background-color: #2f3136;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .command-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        .command-header h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 1em;
+            flex: 1;
+        }
+        .command-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #40444b;
+        }
+        .command-content.active {
+            display: block;
+        }
+        .remove-command {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #ed4245;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        .command-group.collapsed,
+        .trigger-group.collapsed {
+            padding: 10px 15px;
+        }
+        .command-group.collapsed .command-header,
+        .trigger-group.collapsed .command-header {
+            margin: 0;
+        }
+        .command-group.collapsed .remove-command,
+        .trigger-group.collapsed .remove-command {
+            top: 10px;
+            right: 10px;
+        }
+        .add-command {
+            background-color: #43b581;
+            margin-bottom: 20px;
+        }
+        .add-command:hover {
+            background-color: #3ca374;
+        }
+        #file-input {
+            display: none;
+        }
+        .file-input-label {
+            display: inline-block;
+            background-color: #5865f2;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .file-input-label:hover {
+            background-color: #4752c4;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ed4245;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #43b581;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        input[type="text"]:disabled {
+            background-color: #2f3136;
+            color: #72767d;
+            cursor: not-allowed;
+        }
+        .welcome-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .welcome-group label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        .welcome-group input[type="text"] {
+            flex: 1;
+        }
+        .trigger-group {
+            background-color: #2f3136;
+            padding: 25px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .match-type {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .match-type label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        /* プレフィックスとウェルカムメッセージの畳んだ状態風スタイル */
+        .setting-item-collapsed-style {
+            background-color: #2f3136;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .setting-item-collapsed-style .setting-header h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 1em;
+        }
+        .setting-item-collapsed-style .setting-content {
+            display: none; /* デフォルトでは非表示 */
+        }
+        /* プレフィックスとウェルカムメッセージのスタイル */
+        .setting-item-style {
+            background-color: #2f3136;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .setting-item-style .form-group,
+        .setting-item-style .welcome-group {
+            margin-bottom: 0;
+        }
+        .setting-item-style .welcome-group label {
+            margin-bottom: 0;
+        }
+        /* フッターのスタイル */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #72767d;
+        }
+        .footer a {
+            color: #72767d;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        /* コンテンツラッパーのスタイル */
+/*
+        .content-wrapper {
+            display: flex;
+            gap: 40px;
+        }
+*/
+        .status-select {
+            width: 100%;
+            padding: 8px;
+            background-color: #40444b;
+            border: 1px solid #202225;
+            color: #dcddde;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <h1>Discord Bot 設定</h1>
+
+        <label for="file-input" class="file-input-label">config.jsonを選択</label>
+        <input type="file" id="file-input" accept=".json">
+        
+        <div class="setting-item-style">
+            <div class="form-group">
+                <label for="prefix">コマンドプレフィックス:</label>
+                <input type="text" id="prefix" value="!">
+            </div>
+        </div>
+
+        <div class="setting-item-style">
+            <div class="welcome-group">
+                <label for="welcome_message">ウェルカムメッセージ:</label>
+                <input type="text" id="welcome_message" value="ようこそ！">
+                <label class="switch">
+                    <input type="checkbox" id="welcome_enabled" checked onchange="toggleWelcomeMessage()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="setting-item-style">
+            <div class="form-group">
+                <label for="status_type">ボットのステータス:</label>
+                <select id="status_type" class="status-select">
+                    <option value="online">オンライン</option>
+                    <option value="idle">退席中</option>
+                    <option value="dnd">取り込み中</option>
+                    <option value="invisible">非表示</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status_message">ステータスメッセージ:</label>
+                <input type="text" id="status_message" placeholder="例: お手伝い中">
+            </div>
+        </div>
+
+        <h2>コマンド設定</h2>
+        <button class="add-command" onclick="addCommand()">+ コマンドを追加</button>
+        <div id="commands-container">
+            <!-- コマンドはここに動的に追加されます -->
+        </div>
+
+        <h2>メッセージトリガー設定</h2>
+        <button class="add-command" onclick="addTrigger()">+ トリガーを追加</button>
+        <div id="triggers-container">
+            <!-- トリガーはここに動的に追加されます -->
+        </div>
+
+        <button onclick="saveSettings()">設定を保存</button>
+        <div id="status"></div>
+    </div>
+
+    <div class="variables-sidebar">
+        <h3>使用可能な変数</h3>
+        <code>{user}</code>
+        <span>メンション付きユーザー名</span>
+        <code>{username}</code>
+        <span>ユーザー名（メンションなし）</span>
+        <code>{server}</code>
+        <span>サーバー名</span>
+    </div>
+
+    <script>
+        // ファイル選択時の処理
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const config = JSON.parse(e.target.result);
+                        loadConfigIntoForm(config);
+                    } catch (error) {
+                        showStatus('JSONファイルの読み込みに失敗しました。', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function toggleWelcomeMessage() {
+            const welcomeInput = document.getElementById('welcome_message');
+            const isEnabled = document.getElementById('welcome_enabled').checked;
+            welcomeInput.disabled = !isEnabled;
+            if (!isEnabled) {
+                welcomeInput.value = '';
+            } else if (!welcomeInput.value) {
+                welcomeInput.value = 'ようこそ！';
+            }
+        }
+
+        function loadConfigIntoForm(config) {
+            // 基本設定を読み込む
+            document.getElementById('prefix').value = config.prefix || '!';
+            document.getElementById('welcome_message').value = config.welcome_message || 'ようこそ！';
+            document.getElementById('welcome_enabled').checked = config.welcome_enabled !== false;
+            document.getElementById('status_type').value = config.status_type || 'online';
+            document.getElementById('status_message').value = config.status_message || '';
+            toggleWelcomeMessage();
+            
+            // 既存のコマンドをクリア
+            document.getElementById('commands-container').innerHTML = '';
+            document.getElementById('triggers-container').innerHTML = '';
+            
+            // コマンドを読み込む
+            if (config.commands && config.commands.length > 0) {
+                config.commands.forEach(cmd => {
+                    addCommand(cmd.name, cmd.response);
+                });
+            }
+
+            // トリガーを読み込む
+            if (config.triggers && config.triggers.length > 0) {
+                config.triggers.forEach(trigger => {
+                    addTrigger(trigger.text, trigger.response, trigger.match_type);
+                });
+            }
+
+            showStatus('設定を読み込みました！', 'success');
+        }
+
+        function addCommand(name = '', response = '') {
+            const commandId = Date.now();
+            const commandHtml = `
+                <div class="command-group" id="command-${commandId}">
+                    <div class="command-header" onclick="toggleCommand(${commandId})">
+                        <h3>${name || '新しいコマンド'}</h3>
+                    </div>
+                    <div class="command-content">
+                        <button class="remove-command" onclick="removeCommand(${commandId})">削除</button>
+                        <div class="form-group">
+                            <label>コマンド名:</label>
+                            <input type="text" class="command-name" placeholder="例: hello" value="${name}" onchange="updateCommandHeader(${commandId})">
+                        </div>
+                        <div class="form-group">
+                            <label>応答メッセージ:</label>
+                            <textarea class="command-response" placeholder="例: こんにちは！">${response}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('commands-container').insertAdjacentHTML('beforeend', commandHtml);
+        }
+
+        function toggleCommand(id) {
+            const commandGroup = document.getElementById(`command-${id}`);
+            const content = commandGroup.querySelector('.command-content');
+            content.classList.toggle('active');
+            commandGroup.classList.toggle('collapsed');
+        }
+
+        function toggleTrigger(id) {
+            const triggerGroup = document.getElementById(`trigger-${id}`);
+            const content = triggerGroup.querySelector('.command-content');
+            content.classList.toggle('active');
+            triggerGroup.classList.toggle('collapsed');
+        }
+
+        function updateCommandHeader(id) {
+            const commandGroup = document.getElementById(`command-${id}`);
+            const name = commandGroup.querySelector('.command-name').value;
+            const header = commandGroup.querySelector('h3');
+            header.textContent = name || '新しいコマンド';
+        }
+
+        function removeCommand(id) {
+            document.getElementById(`command-${id}`).remove();
+        }
+
+        function addTrigger(trigger = '', response = '', matchType = 'partial') {
+            const triggerId = Date.now();
+            const triggerHtml = `
+                <div class="trigger-group" id="trigger-${triggerId}">
+                    <div class="command-header" onclick="toggleTrigger(${triggerId})">
+                        <h3>${trigger || '新しいトリガー'}</h3>
+                    </div>
+                    <div class="command-content">
+                        <button class="remove-command" onclick="removeTrigger(${triggerId})">削除</button>
+                        <div class="form-group">
+                            <label>トリガーテキスト:</label>
+                            <input type="text" class="trigger-text" placeholder="例: うんこ" value="${trigger}" onchange="updateTriggerHeader(${triggerId})">
+                        </div>
+                        <div class="form-group">
+                            <label>応答メッセージ:</label>
+                            <textarea class="trigger-response" placeholder="例: unko">${response}</textarea>
+                        </div>
+                        <div class="match-type">
+                            <label>
+                                <input type="radio" name="match-${triggerId}" value="partial" ${matchType === 'partial' ? 'checked' : ''}>
+                                部分一致
+                            </label>
+                            <label>
+                                <input type="radio" name="match-${triggerId}" value="exact" ${matchType === 'exact' ? 'checked' : ''}>
+                                完全一致
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('triggers-container').insertAdjacentHTML('beforeend', triggerHtml);
+        }
+
+        function updateTriggerHeader(id) {
+            const triggerGroup = document.getElementById(`trigger-${id}`);
+            const text = triggerGroup.querySelector('.trigger-text').value;
+            const header = triggerGroup.querySelector('h3');
+            header.textContent = text || '新しいトリガー';
+        }
+
+        function removeTrigger(id) {
+            document.getElementById(`trigger-${id}`).remove();
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = type;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        function saveSettings() {
+            // コマンドの収集
+            const commandGroups = document.getElementsByClassName('command-group');
+            const commands = [];
+            for (let group of commandGroups) {
+                const name = group.querySelector('.command-name').value;
+                const response = group.querySelector('.command-response').value
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\n/g, '\\n');
+                if (name && response) {
+                    commands.push({
+                        name: name,
+                        response: response
+                    });
+                }
+            }
+
+            // トリガーの収集
+            const triggerGroups = document.getElementsByClassName('trigger-group');
+            const triggers = [];
+            for (let group of triggerGroups) {
+                const text = group.querySelector('.trigger-text').value;
+                const response = group.querySelector('.trigger-response').value
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\n/g, '\\n');
+                const matchType = group.querySelector('input[type="radio"]:checked').value;
+                if (text && response) {
+                    triggers.push({
+                        text: text,
+                        response: response,
+                        match_type: matchType
+                    });
+                }
+            }
+
+            const settings = {
+                prefix: document.getElementById('prefix').value,
+                welcome_message: document.getElementById('welcome_message').value,
+                welcome_enabled: document.getElementById('welcome_enabled').checked,
+                status_type: document.getElementById('status_type').value,
+                status_message: document.getElementById('status_message').value,
+                commands: commands,
+                triggers: triggers
+            };
+
+            // クリップボードにコピー
+            navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
+                .then(() => {
+                    showStatus('設定をクリップボードにコピーしました！config.jsonに貼り付けてください。', 'success');
+                })
+                .catch(err => {
+                    showStatus('クリップボードへのコピーに失敗しました。', 'error');
+                });
+        }
+    </script>
+</body>
+</html> 
