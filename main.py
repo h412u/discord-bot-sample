@@ -44,6 +44,91 @@ intents.members = True
 config = load_config()
 bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
+# カスタムhelpコマンドの実装
+class CustomHelpCommand(commands.HelpCommand):
+    async def send_bot_help(self, mapping):
+        embed = discord.Embed(
+            title="📚 コマンド一覧",
+            description=f"プレフィックス: `{config['prefix']}`\n\n**コマンド一覧**",
+            color=discord.Color.blue()
+        )
+        
+        # ボットのアイコンを大きく表示
+        embed.set_thumbnail(url=bot.user.display_avatar.url)
+        
+        # バナー画像を追加
+        try:
+            user = await bot.fetch_user(bot.user.id)
+            if user.banner:
+                embed.set_image(url=user.banner.url)
+        except:
+            pass
+        
+        # コマンドセクション
+        commands_text = ""
+        for cmd in config.get('commands', []):
+            commands_text += f"`{config['prefix']}{cmd['name']}` - {cmd['response']}\n"
+        if commands_text:
+            embed.add_field(
+                name="🎮 コマンド",
+                value=commands_text or "コマンドは登録されていません",
+                inline=False
+            )
+        
+        # トリガーセクション
+        triggers_text = ""
+        for trigger in config.get('triggers', []):
+            match_type = "完全一致" if trigger['match_type'] == 'exact' else "部分一致"
+            triggers_text += f"`{trigger['text']}` ({match_type}) - {trigger['response']}\n"
+        if triggers_text:
+            embed.add_field(
+                name="⚡ トリガー",
+                value=triggers_text or "トリガーは登録されていません",
+                inline=False
+            )
+
+        # ボット情報
+        embed.set_author(
+            name=f"{bot.user.name} ヘルプ",
+            icon_url=bot.user.display_avatar.url
+        )
+        embed.set_footer(
+            text=f"サーバー数: {len(bot.guilds)} | ユーザー数: {sum(g.member_count for g in bot.guilds)}",
+            icon_url=bot.user.display_avatar.url
+        )
+        
+        await self.get_destination().send(embed=embed)
+
+    async def send_command_help(self, command):
+        for cmd in config.get('commands', []):
+            if cmd['name'] == command.name:
+                embed = discord.Embed(
+                    title=f"📖 {config['prefix']}{command.name}",
+                    description=cmd['response'],
+                    color=discord.Color.blue()
+                )
+                # ボットのアイコンを大きく表示
+                embed.set_thumbnail(url=bot.user.display_avatar.url)
+                # バナー画像を追加
+                try:
+                    user = await bot.fetch_user(bot.user.id)
+                    if user.banner:
+                        embed.set_image(url=user.banner.url)
+                except:
+                    pass
+                embed.set_author(
+                    name=f"{bot.user.name} コマンドヘルプ",
+                    icon_url=bot.user.display_avatar.url
+                )
+                embed.set_footer(
+                    text=f"プレフィックス: {config['prefix']}",
+                    icon_url=bot.user.display_avatar.url
+                )
+                await self.get_destination().send(embed=embed)
+                return
+
+bot.help_command = CustomHelpCommand()
+
 def replace_variables(message, user, guild):
     """メッセージ内の変数を置換する"""
     return message.replace('{user}', user.mention) \
