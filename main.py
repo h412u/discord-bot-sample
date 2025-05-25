@@ -68,24 +68,43 @@ class CustomHelpCommand(commands.HelpCommand):
         commands_text = ""
         for cmd in config.get('commands', []):
             commands_text += f"`{config['prefix']}{cmd['name']}` - {cmd['response']}\n"
-        if commands_text:
-            embed.add_field(
-                name="🎮 コマンド",
-                value=commands_text or "コマンドは登録されていません",
-                inline=False
-            )
         
         # トリガーセクション
         triggers_text = ""
         for trigger in config.get('triggers', []):
             match_type = "完全一致" if trigger['match_type'] == 'exact' else "部分一致"
             triggers_text += f"`{trigger['text']}` ({match_type}) - {trigger['response']}\n"
-        if triggers_text:
-            embed.add_field(
-                name="⚡ トリガー",
-                value=triggers_text or "トリガーは登録されていません",
-                inline=False
-            )
+
+        # コマンドとトリガーが両方ない場合
+        if not commands_text and not triggers_text:
+            embed.description = f"プレフィックス: `{config['prefix']}`\n\n**コマンドとトリガーが登録されていません**\n\nコマンドやトリガーを追加するには、`config.json`を編集してください。"
+        else:
+            # コマンドがある場合のみ表示
+            if commands_text:
+                embed.add_field(
+                    name="🎮 コマンド",
+                    value=commands_text,
+                    inline=False
+                )
+            else:
+                embed.add_field(
+                    name="🎮 コマンド",
+                    value="コマンドは登録されていません",
+                    inline=False
+                )
+            # トリガーがある場合のみ表示
+            if triggers_text:
+                embed.add_field(
+                    name="⚡ トリガー",
+                    value=triggers_text,
+                    inline=False
+                )
+            else:
+                embed.add_field(
+                    name="⚡ トリガー",
+                    value="トリガーは登録されていません",
+                    inline=False
+                )
 
         # ボット情報
         embed.set_author(
