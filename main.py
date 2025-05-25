@@ -47,6 +47,7 @@ bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 # カスタムhelpコマンドの実装
 class CustomHelpCommand(commands.HelpCommand):
     async def send_bot_help(self, mapping):
+        print_log(f'ヘルプコマンドが実行されました', "HELP")
         embed = discord.Embed(
             title="📚 コマンド一覧",
             description=f"プレフィックス: `{config['prefix']}`\n\n**コマンド一覧**",
@@ -119,6 +120,7 @@ class CustomHelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command):
+        print_log(f'コマンドヘルプが実行されました: {command.name}', "HELP")
         for cmd in config.get('commands', []):
             if cmd['name'] == command.name:
                 embed = discord.Embed(
@@ -171,24 +173,30 @@ for cmd in config.get('commands', []):
 async def on_ready():
     print_log(f'{bot.user} としてログインしました', "BOT")
     print_log(f'プレフィックス: {config["prefix"]}', "CONFIG")
+    print_log(f'ステータス: {config["status_type"]} - {config["status_message"] or "なし"}', "CONFIG")
+
+    # コマンド設定のログ
+    if config.get('commands'):
+        print_log('登録されているコマンド:', "COMMANDS")
+        for cmd in config['commands']:
+            print_log(f'  - {config["prefix"]}{cmd["name"]}: {cmd["response"]}', "COMMAND")
+    else:
+        print_log('コマンドは登録されていません', "COMMANDS")
+
+    # トリガー設定のログ
+    if config.get('triggers'):
+        print_log('登録されているメッセージトリガー:', "TRIGGERS")
+        for trigger in config['triggers']:
+            match_type = "完全一致" if trigger['match_type'] == 'exact' else "部分一致"
+            print_log(f'  - トリガー: {trigger["text"]} ({match_type})', "TRIGGER")
+            print_log(f'    応答: {trigger["response"]}', "RESPONSE")
+    else:
+        print_log('トリガーは登録されていません', "TRIGGERS")
 
     # ステータスの設定
     status_type = getattr(discord.Status, config.get('status_type', 'online'))
     activity = discord.Game(name=config.get('status_message', '')) if config.get('status_message') else None
     await bot.change_presence(status=status_type, activity=activity)
-    print_log(f'ステータス: {config["status_type"]} - {config["status_message"] or "なし"}', "CONFIG")
-
-    if config.get('commands'):
-        print_log('登録されているコマンド:', "COMMANDS")
-        for cmd in config['commands']:
-            print_log(f'  - {config["prefix"]}{cmd["name"]}: {cmd["response"]}', "COMMAND")
-
-    if config.get('triggers'):
-        print_log('登録されているメッセージトリガー:', "TRIGGERS")
-        for trigger in config['triggers']:
-            match_type = "部分一致" if trigger['match_type'] == 'partial' else "完全一致"
-            print_log(f'  - トリガー: {trigger["text"]} ({match_type})', "TRIGGER")
-            print_log(f'    応答: {trigger["response"]}', "RESPONSE")
 
 @bot.event
 async def on_member_join(member):
